@@ -2,7 +2,14 @@
 
 ## Overview
 
-`model_comparison_and_grading.py` is a comprehensive tool for testing multiple image generation models against one or more prompts. It generates images using different AI models (OpenAI and FAL.ai), optionally evaluates them using GPT-4o vision, and produces detailed reports with cost tracking.
+`model_comparison_and_grading.py` is a tool for testing multiple image generation models against one or more prompts. It generates images using different models (currently from OpenAI or from FAL.ai), and optionally grades the image generations using GPT-4o vision, and produces detailed reports with cost tracking.
+
+`PROMPTS/prompt_test_set.json` contains the grading criteria.
+
+`model_config.py` contains the model parameters.
+
+The models currently available are: gpt-image-1, DALL·E 3, DALL·E 2, flux-pro/v1.1-ultra, recraft/v3, flux-2, bria/text-to-image/3.2, imagen4/preview/fast, HiDream-I1 full, HiDream-I1 fast.
+
 
 ## Features
 
