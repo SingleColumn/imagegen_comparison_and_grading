@@ -1,0 +1,300 @@
+{
+  "__meta__": {
+    "title": "Prompt Test Set for Image Generation Models",
+    "updated_at": "2026-01-12",
+    "timezone": "Europe/Madrid",
+    "purpose": "Diagnostic evaluation of image generation models via isolated behavioral prompts and explicit grading criteria.",
+    "design_principles": [
+      "Behavioral, not mechanistic: assessed capabilities must be directly observable; avoid claims about model internals.",
+      "Falsifiable and concrete: each prompt admits clear success/failure cases with operational checks.",
+      "Separation of concerns: feature_assessed (observable capability) ≠ what_it_reveals (interpretation) ≠ grading_criteria (scoring procedure).",
+      "Overlap without redundancy: prompts may share capability tags but must differ in stress pattern/constraints/failure signatures.",
+      "Interpretability over coverage: prefer fewer well-isolated prompts to broad ambiguous ones."
+    ],
+    "governance_rules": {
+      "capability_tags": "Use 1–3 terms from controlled_vocabulary; first tag is primary.",
+      "adding_new_terms": "Add only when no existing term fits; document rationale and version the vocabulary.",
+      "grading_independence": "grading_criteria must be sufficient to score an image without reading feature_assessed or what_it_reveals."
+    },
+    "field_semantics": {
+      "prompt_name": "Short stable identifier for the test.",
+      "prompt": "Exact prompt text supplied to the model.",
+      "capability_tags": "Controlled vocabulary terms indicating the behavioral capabilities probed.",
+      "feature_assessed": "Concrete observable capability required for success; phrased behaviorally.",
+      "what_it_reveals": "Interpretive meaning of success/failure; abstracts above prompt specifics and grading mechanics.",
+      "grading_criteria": "Prompt-specific grading rules supplying only concrete checks, failure modes, and rubric text."
+    }
+  },
+
+  "general_grading_framework": {
+    "evaluation_procedure": [
+      "Check hard_fail_conditions; if any are met, apply the associated score cap.",
+      "Verify required_checks to determine which prompt constraints are satisfied.",
+      "Detect failure_modes and apply the most severe applicable score cap.",
+      "Select the highest scoring_rubric value that does not exceed the active score cap."
+    ],
+    "grading_components": {
+      "hard_fail_conditions": "Binary violations of explicitly stated core prompt constraints.",
+      "required_checks": "Observable elements, relations, or properties explicitly demanded by the prompt.",
+      "failure_modes": "Recognizable degradation patterns grouped by severity level.",
+      "severity_levels": {
+        "severe": {
+          "score_cap": 2,
+          "meaning": "Core structural or logical failure"
+        },
+        "moderate": {
+          "score_cap": 4,
+          "meaning": "Partial degradation under stress"
+        }
+      }
+    },
+    "score_meanings": {
+      "5": "Complete success under all specified constraints; no meaningful degradation.",
+      "4": "Minor degradation that does not violate core constraints.",
+      "3": "Partial success with ambiguity, inconsistency, or weakened constraint satisfaction.",
+      "2": "Major breakdown of required structure, logic, or identity.",
+      "1": "Failure of the core task or collapse of required elements."
+    }
+  },
+
+  "controlled_vocabulary": {
+    "Structural Preservation": {
+      "definition": "Maintaining discrete objects or parts without collapse as global appearance or rendering conditions vary.",
+      "excludes": "Purely aesthetic quality; stylistic preference."
+    },
+    "Relational Consistency": {
+      "definition": "Respecting explicit relationships between objects (spatial placement, containment, ordering, separation).",
+      "excludes": "General scene plausibility without specified constraints."
+    },
+    "Identity Persistence": {
+      "definition": "Preserving the same object or symbol identity across contexts, transformations, or repeated depictions.",
+      "excludes": "Maintaining only broad category similarity without matching defining attributes."
+    },
+    "Geometric Consistency": {
+      "definition": "Producing mutually consistent viewpoints, reflections, and projections that agree with a single coherent geometry.",
+      "excludes": "Local plausibility that contradicts global scene geometry."
+    },
+    "High-Frequency Detail Fidelity": {
+      "definition": "Rendering non-repetitive fine detail and micro-structure instead of blur, noise, or tiled textures.",
+      "excludes": "Medium-frequency patterns or general sharpness without structural variation."
+    },
+    "Symbolic Exactness": {
+      "definition": "Producing exact, legible symbols (especially text) with correct spelling and stable character shapes.",
+      "excludes": "Approximate lettering that is suggestive but incorrect."
+    },
+    "Physical Interaction Coherence": {
+      "definition": "Depicting plausible contact, motion, and interaction between parts and objects.",
+      "excludes": "Static scenes without interaction demands."
+    },
+    "Light–Material Plausibility": {
+      "definition": "Rendering light behavior consistent with material properties.",
+      "excludes": "Stylized lighting effects not grounded in geometry or materials."
+    }
+  },
+
+  "prompts": [
+    {
+      "prompt_name": "coloured_grid_test",
+      "feature_assessed": "Maintaining discrete object structure and material appearance while smooth global visual transformations vary brightness, sharpness, and color",
+      "prompt": "A grid of glass squares framed in golden-colored borders.\nFrom top to bottom, there is a uniform vertical color gradient where the squares gradually and uniformly transition from blue at the top to yellow at the bottom.\nFrom left to right, there is a uniform horizontal gradient where the image becomes progressively brighter and fuzzier.\nThe grid of squares, their borders, and their alignment remain distinguishable across the entire image.",
+      "what_it_reveals": "Indicates whether the model can apply continuous global effects without collapsing distinct objects into texture, noise, or inconsistent attributes as visual complexity increases.",
+      "grading_criteria": {
+        "hard_fail_conditions": [
+          "Grid structure is absent or collapses into a non-grid pattern",
+          "Blue and yellow are not both present in the squares",
+          "Golden borders are missing on most squares",
+          "No clear top-to-bottom color transition"
+        ],
+        "required_checks": [
+          "Clear grid of squares",
+          "Golden borders on each square",
+          "Glass-like material",
+          "Smooth vertical blue-to-yellow gradient",
+          "Smooth horizontal brightness increase",
+          "Smooth horizontal blur increase",
+          "Grid remains distinguishable"
+        ],
+        "failure_modes": {
+          "severe": ["Loss of grid structure", "Color collapse", "Border disappearance"],
+          "moderate": ["Gradient banding", "Early excessive blur", "Inconsistent borders"]
+        },
+        "scoring_rubric": {
+          "5": "Structure and gradients remain clear across entire image.",
+          "4": "Minor degradation at extremes.",
+          "3": "Significant degradation under blur.",
+          "2": "Early ambiguity.",
+          "1": "Structure collapses."
+        }
+      },
+      "capability_tags": ["Structural Preservation", "Light–Material Plausibility"]
+    },
+
+    {
+      "prompt_name": "Spatial_Reasoning_&_Composition",
+      "feature_assessed": "Respecting multiple explicit spatial, containment, and ordering relationships within a single scene",
+      "prompt": "A small red cube sits on top of a large blue sphere, which is inside a transparent glass box.\nThe glass box rests on a wooden table.\nA green cylinder is partially behind the box but not touching it.\nA yellow pyramid sits to the left of the box, outside it.\nAll objects are solid, non-floating, correctly scaled, and clearly separated.",
+      "what_it_reveals": "Shows whether spatial relationships are treated as hard constraints or loosely satisfied descriptions.",
+      "grading_criteria": {
+        "hard_fail_conditions": ["Missing object", "Incorrect color", "Incorrect containment", "Cube not on sphere"],
+        "required_checks": [
+          "Cube on sphere",
+          "Sphere inside box",
+          "Box on table",
+          "Cylinder behind box",
+          "Pyramid left of box",
+          "No intersections"
+        ],
+        "failure_modes": {
+          "severe": ["Incorrect containment", "Floating objects"],
+          "moderate": ["Depth ambiguity", "Left-right inversion"]
+        },
+        "scoring_rubric": {
+          "5": "All relations unambiguous.",
+          "4": "Minor ambiguity.",
+          "3": "One relation unclear.",
+          "2": "Multiple incorrect relations.",
+          "1": "Core relational failure."
+        }
+      },
+      "capability_tags": ["Relational Consistency", "Structural Preservation"]
+    },
+
+    {
+      "prompt_name": "High_Frequency_Textural_Detail",
+      "feature_assessed": "Rendering non-repetitive high-frequency surface detail under extreme magnification",
+      "prompt": "An extreme macro close-up of a dragonfly's wing showing iridescent microscopic hexagonal cells with slight variation. Tiny dew drops refract the underlying pattern.",
+      "what_it_reveals": "Whether fine structural variation is preserved or replaced by blur or tiling.",
+      "grading_criteria": {
+        "hard_fail_conditions": ["No hexagonal structure"],
+        "required_checks": ["Visible hexagonal cells", "Cell variation", "Refraction in dew drops"],
+        "failure_modes": {
+          "severe": ["Uniform blur or noise", "No microstructure"],
+          "moderate": ["Repetitive tiling", "Simplified refraction"]
+        },
+        "scoring_rubric": {
+          "5": "Rich non-repetitive microstructure.",
+          "4": "Mostly varied detail.",
+          "3": "Partial repetition.",
+          "2": "Synthetic texture.",
+          "1": "No detail."
+        }
+      },
+      "capability_tags": ["High-Frequency Detail Fidelity", "Light–Material Plausibility"]
+    },
+
+    {
+      "prompt_name": "Precise_Text_Rendering",
+      "feature_assessed": "Producing exact, legible text with stable character identity across transformations",
+      "prompt": "A neon sign reading 'NEURO-DYNAMICS' reflected in a wet puddle.",
+      "what_it_reveals": "Whether text is generated symbolically or as approximate texture.",
+      "grading_criteria": {
+        "hard_fail_conditions": ["Spelling error", "Missing hyphen", "Unreadable text"],
+        "required_checks": ["Exact spelling", "Consistent font", "Legible reflection"],
+        "failure_modes": {
+          "severe": ["Incorrect spelling"],
+          "moderate": ["Character warping", "Reflection distortion"]
+        },
+        "scoring_rubric": {
+          "5": "Perfect text and reflection.",
+          "4": "Minor distortions.",
+          "3": "Readable but degraded.",
+          "2": "Malformed characters.",
+          "1": "Unreadable."
+        }
+      },
+      "capability_tags": ["Symbolic Exactness", "Identity Persistence"]
+    },
+
+    {
+      "prompt_name": "Anatomical_Complexity_&_Physics",
+      "feature_assessed": "Maintaining anatomically correct parts and physically coherent interactions",
+      "prompt": "A close-up of hands knitting with needles and yarn.",
+      "what_it_reveals": "Whether anatomy and interaction are modeled as structured systems.",
+      "grading_criteria": {
+        "hard_fail_conditions": ["Incorrect finger count", "Merged fingers"],
+        "required_checks": ["Two hands", "Five fingers per hand", "Continuous yarn path"],
+        "failure_modes": {
+          "severe": ["Extra or missing fingers"],
+          "moderate": ["Unclear yarn interaction"]
+        },
+        "scoring_rubric": {
+          "5": "Correct anatomy and coherent knitting.",
+          "4": "Minor interaction ambiguity.",
+          "3": "Correct anatomy but weak interaction.",
+          "2": "Multiple interaction errors.",
+          "1": "Severe anatomical failure."
+        }
+      },
+      "capability_tags": ["Physical Interaction Coherence", "Structural Preservation"]
+    },
+
+    {
+      "prompt_name": "Semantic_Density",
+      "feature_assessed": "Maintaining consistent object identity across divergent contexts",
+      "prompt": "Split-screen: steampunk scientist and futuristic astronaut holding the same distinctive compass.",
+      "what_it_reveals": "Whether object identity persists across stylistic shifts.",
+      "grading_criteria": {
+        "hard_fail_conditions": ["Compass missing", "Compass differs between halves"],
+        "required_checks": ["Split screen", "Distinct styles", "Matching compass details"],
+        "failure_modes": {
+          "severe": ["Different compass instances"],
+          "moderate": ["Minor attribute mismatch"]
+        },
+        "scoring_rubric": {
+          "5": "Identical compass across contexts.",
+          "4": "Minor differences.",
+          "3": "Recognizable but degraded identity.",
+          "2": "Weak identity.",
+          "1": "Identity fails."
+        }
+      },
+      "capability_tags": ["Identity Persistence"]
+    },
+
+    {
+      "prompt_name": "Photorealism",
+      "feature_assessed": "Producing physically plausible light behavior in transparent materials",
+      "prompt": "Macro photograph of a glass of iced water with lemon producing caustics.",
+      "what_it_reveals": "Whether light–material interaction is physically grounded.",
+      "grading_criteria": {
+        "hard_fail_conditions": ["No caustics"],
+        "required_checks": ["Caustic pattern", "Aligned with geometry", "Internal ice refraction"],
+        "failure_modes": {
+          "severe": ["Opaque glass"],
+          "moderate": ["Generic lighting"]
+        },
+        "scoring_rubric": {
+          "5": "Physically coherent caustics.",
+          "4": "Simplified but aligned lighting.",
+          "3": "Suggestive lighting only.",
+          "2": "Mostly decorative lighting.",
+          "1": "No plausible interaction."
+        }
+      },
+      "capability_tags": ["Light–Material Plausibility"]
+    },
+
+    {
+      "prompt_name": "3D_Spatial_Art",
+      "feature_assessed": "Maintaining geometrically consistent reflections and viewpoints",
+      "prompt": "Isometric room with mirrors reflecting an asymmetric engine.",
+      "what_it_reveals": "Whether global 3D geometry is enforced.",
+      "grading_criteria": {
+        "hard_fail_conditions": ["No reflections", "Contradictory geometry"],
+        "required_checks": ["Isometric view", "Distinct reflections", "Consistent geometry"],
+        "failure_modes": {
+          "severe": ["Impossible geometry"],
+          "moderate": ["Perspective drift"]
+        },
+        "scoring_rubric": {
+          "5": "All reflections geometrically correct.",
+          "4": "Minor reflection error.",
+          "3": "Generic reflections.",
+          "2": "Contradictory views.",
+          "1": "Geometry collapses."
+        }
+      },
+      "capability_tags": ["Geometric Consistency", "Relational Consistency"]
+    }
+  ]
+}
